@@ -10,7 +10,12 @@ const Trend = require('../models/trends');
 //Recouperer tous les tweets
 router.get('/', function(req, res, next) {
   Tweet.find({}).populate('user').then(data => {
-    res.json({ content: data.content, createAt: data.createAt, token: data.user.token });
+    const formattedData = data.map(tweet => ({
+      content: tweet.content,
+      createAt: tweet.createAt,
+      token: tweet.user.token 
+    }));
+    res.json(formattedData);
   })
 })
 
