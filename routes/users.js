@@ -20,7 +20,7 @@ router.post('/signup', (req, res) => {
 
       const newUser = new User({
         username: req.body.username,
-        email: req.body.email,
+        firstname: req.body.firstname,
         password: hash,
         token: uid2(32),
       });
