@@ -9,7 +9,11 @@ const Trend = require('../models/trends');
 //Recouperer tous les trends
 router.get('/', function(req, res, next) {
   Trend.find({}).populate('tweet').then(data => {
-    res.json({ trend: data.trend, tweet: data.tweet });
+    const formattedData = data.map(trend => ({
+        trend: trend.trend, 
+        tweet: trend.tweet,
+      }));
+    res.json(formattedData);
   })
 })
 //Créer un trend
