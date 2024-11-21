@@ -33,9 +33,7 @@ router.post('/NewTweet/:token', (req, res) => {
 //Effacer un tweet 
 router.delete('/:id', function(req, res, next) {
   const id = req.params.id
-  Trend.deleteOne({ tweet: id }).then(()=>{
-    res.json({ message: "This trend has been deleted."})
-})
+  Trend.deleteOne({ tweet: id })
   Tweet.deleteOne({ _id: id }).then(()=>{
       res.json({ message: "This tweet has been deleted."})
   })
