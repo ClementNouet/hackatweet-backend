@@ -13,7 +13,8 @@ router.get('/', function(req, res, next) {
     const formattedData = data.map(tweet => ({
       content: tweet.content,
       createAt: tweet.createAt,
-      token: tweet.user.token 
+      token: tweet.user.token,
+      username: tweet.user.username
     }));
     res.json(formattedData);
   })
