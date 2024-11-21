@@ -12,6 +12,7 @@ router.get('/', function(req, res, next) {
     res.json({ content: data.content, createAt: data.createAt, token: data.user.token });
   })
 })
+
 //Créer un tweet
 router.post('/NewTweet/:token', (req, res) => {
   User.findOne({token: req.params.token}).then(data => {
