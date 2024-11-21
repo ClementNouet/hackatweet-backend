@@ -9,6 +9,8 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var tweetsRouter = require('./routes/tweets');
 
+const cors = require('cors')// on importe le module cors 
+app.use(cors()) // on active le module cors
 
 var app = express();
 
