@@ -14,7 +14,8 @@ router.get('/', function(req, res, next) {
       content: tweet.content,
       createAt: tweet.createAt,
       token: tweet.user.token,
-      username: tweet.user.username
+      username: tweet.user.username, 
+      likes: tweet.likes
     }));
     res.json(formattedData);
   })
@@ -38,6 +39,10 @@ router.delete('/:id', function(req, res, next) {
       res.json({ message: "This tweet has been deleted."})
   })
 })
-
+//Ajouter des likes
+router.put('/:id', function(req, res, next) {
+  const id = req.params.id
+  Tweet.updateOne({_id : id}, {likes: likes++})
+})
 
 module.exports = router;
