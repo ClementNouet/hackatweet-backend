@@ -18,7 +18,8 @@ router.get('/', function(req, res, next) {
 })
 //Créer un trend
 router.post('/NewTrend', (req, res) => {
-    Tweet.findOne({ content: { $regex: new RegExp(req.body.trend, 'g') } }).then(data => {
+    Tweet.findOne({ content: { $regex: new RegExp(req.body.trend, 'g') } })
+    .then(data => {
         const newTrend = new Trend({
         trend: req.body.trend,
         tweet: data._id
