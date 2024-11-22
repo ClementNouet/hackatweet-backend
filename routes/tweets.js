@@ -42,7 +42,7 @@ router.delete('/:id', function(req, res, next) {
 //Ajouter des likes
 router.put('/:id', function(req, res, next) {
   const id = req.params.id
-  Tweet.updateOne({_id : id}, {likes: likes++})
+  Tweet.updateOne({_id : id}, { $inc: { likes: 1 } })
 })
 
 module.exports = router;
