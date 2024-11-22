@@ -27,7 +27,8 @@ router.post('/NewTweet/:token', (req, res) => {
       content: req.body.tweet,
       createAt: new Date,
       user: data._id, 
-      likes: 0
+      likes: 0,
+      usersLikes: []
     })
     newTweet.save().then(res.json({ result: true }))
   })
@@ -43,8 +44,28 @@ router.delete('/:id', function(req, res, next) {
 //Ajouter des likes
 router.put('/:id', function(req, res, next) {
   const id = req.params.id
-  Tweet.updateOne({_id : id}, {likes: req.body.likes})
-  .then(()=> res.json({ result: true }))
+  const userToken = req.body.token;
+  const isLiked = req.body.isLiked;
+  if (isLiked) {
+    Tweet.updateOne(
+      { _id: id, "usersLikes.user": {$ne: userToken}  }, // On vérifie si l'utilisateur a déjà aimé ce tweet
+      { 
+        $push: { usersLikes: { user: userToken, isLiked: isLiked } }, // Ajoute l'utilisateur dans la liste des likes
+        $set: { likes: req.body.likes } // Met à jour le nombre total de likes
+      }
+    )
+    .then(() => res.json({ result: true }))
+  }else {
+    // Si l'utilisateur ne veut plus aimer le tweet, il faut le retirer de la liste des likes
+    Tweet.updateOne(
+      { _id: id, "usersLikes.user": userToken }, 
+      { 
+        $pull: { usersLikes: { user: userToken } }, // Retire l'utilisateur de la liste des likes
+        $set: { likes: req.body.likes } // Met à jour le nombre total de likes
+      }
+    )
+    .then(res.json({ result: false}))
+  }
 })
 
 module.exports = router;
