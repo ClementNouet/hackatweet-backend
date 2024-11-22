@@ -46,43 +46,22 @@ router.delete('/:id', function(req, res, next) {
 router.put('/:id', function(req, res, next) {
   const id = req.params.id
   const userToken = req.body.token;
-  const isLiked = req.body.isLiked;
-  if (isLiked) {
-    Tweet.updateOne(
-      { _id: id, usersLikes: {$ne: userToken}  }, // On vérifie si l'utilisateur a déjà aimé ce tweet
-      { 
-        $push: { usersLikes: userToken }, // Ajoute l'utilisateur dans la liste des likes
-      }
-    ).then(() => {
-      // Récupère le tweet pour mettre à jour le compteur de likes
-      return Tweet.findById(id);
-    })
-    .then(tweet => {
-      if (tweet) {
-        tweet.likes = tweet.usersLikes.length; // Met à jour le nombre de likes
-        return tweet.save();
-      }
-    })
-    .then(() => res.json({ result: true }))
-  }else {
-    // Si l'utilisateur ne veut plus aimer le tweet, il faut le retirer de la liste des likes
-    Tweet.updateOne(
-      { _id: id, usersLikes: userToken }, 
-      { 
-        $pull: { usersLikes: userToken}, // Retire l'utilisateur de la liste des likes
-      }
-    ).then(() => {
-      // Récupère le tweet pour mettre à jour le compteur de likes
-      return Tweet.findById(id);
-    })
-    .then(tweet => {
-      if (tweet) {
-        tweet.likes = tweet.usersLikes.length; // Met à jour le nombre de likes
-        return tweet.save();
+
+  Tweet
+    .findById(id)
+    .then((tweet) => {
+      if (tweet.usersLikes.includes(userToken)) {
+        Tweet
+          .findByIdAndUpdate(id, { $pull: { usersLikes: userToken }, $set: { likes: tweet.likes > 0 ? tweet.likes - 1 : 0 } })
+          .exec()
+          .then(() => res.json({ result: false }))
+      } else {
+        Tweet
+          .findByIdAndUpdate(id, { $addToSet: { usersLikes: userToken }, $set: { likes: tweet.likes + 1 } })
+          .exec()
+          .then(() => res.json({ result: true }))
       }
     })
-    .then(res.json({ result: false}))
-  }
 })
 
 module.exports = router;
