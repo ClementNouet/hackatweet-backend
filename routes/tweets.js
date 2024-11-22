@@ -15,7 +15,8 @@ router.get('/', function(req, res, next) {
       createAt: tweet.createAt,
       token: tweet.user.token,
       username: tweet.user.username, 
-      likes: tweet.likes
+      likes: tweet.likes,
+      id: tweet._id
     }));
     res.json(formattedData);
   })
@@ -27,7 +28,8 @@ router.post('/NewTweet/:token', (req, res) => {
     const newTweet = new Tweet({
       content: req.body.tweet,
       createAt: new Date,
-      user: data._id
+      user: data._id, 
+      likes: 0
     })
     newTweet.save().then(res.json({ result: true }))
   })
@@ -43,7 +45,8 @@ router.delete('/:id', function(req, res, next) {
 //Ajouter des likes
 router.put('/:id', function(req, res, next) {
   const id = req.params.id
-  Tweet.updateOne({_id : id}, { $inc: { likes: 1 } })
+  Tweet.updateOne({_id : id}, {likes: req.body.likes})
+  .then(()=> res.json({ result: true }))
 })
 
 module.exports = router;
