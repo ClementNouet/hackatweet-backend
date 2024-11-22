@@ -14,7 +14,8 @@ router.get('/', function(req, res, next) {
       token: tweet.user.token,
       username: tweet.user.username, 
       likes: tweet.likes,
-      id: tweet._id
+      id: tweet._id,
+      usersLikes: tweet.usersLikes
     }));
     res.json(formattedData);
   })
@@ -27,7 +28,7 @@ router.post('/NewTweet/:token', (req, res) => {
       content: req.body.tweet,
       createAt: new Date,
       user: data._id, 
-      likes: 0,
+      likes: 0, 
       usersLikes: []
     })
     newTweet.save().then(res.json({ result: true }))
@@ -48,22 +49,38 @@ router.put('/:id', function(req, res, next) {
   const isLiked = req.body.isLiked;
   if (isLiked) {
     Tweet.updateOne(
-      { _id: id, "usersLikes.user": {$ne: userToken}  }, // On vérifie si l'utilisateur a déjà aimé ce tweet
+      { _id: id, usersLikes: {$ne: userToken}  }, // On vérifie si l'utilisateur a déjà aimé ce tweet
       { 
-        $push: { usersLikes: { user: userToken, isLiked: isLiked } }, // Ajoute l'utilisateur dans la liste des likes
-        $set: { likes: req.body.likes } // Met à jour le nombre total de likes
+        $push: { usersLikes: userToken }, // Ajoute l'utilisateur dans la liste des likes
       }
-    )
+    ).then(() => {
+      // Récupère le tweet pour mettre à jour le compteur de likes
+      return Tweet.findById(id);
+    })
+    .then(tweet => {
+      if (tweet) {
+        tweet.likes = tweet.usersLikes.length; // Met à jour le nombre de likes
+        return tweet.save();
+      }
+    })
     .then(() => res.json({ result: true }))
   }else {
     // Si l'utilisateur ne veut plus aimer le tweet, il faut le retirer de la liste des likes
     Tweet.updateOne(
-      { _id: id, "usersLikes.user": userToken }, 
+      { _id: id, usersLikes: userToken }, 
       { 
-        $pull: { usersLikes: { user: userToken } }, // Retire l'utilisateur de la liste des likes
-        $set: { likes: req.body.likes } // Met à jour le nombre total de likes
+        $pull: { usersLikes: userToken}, // Retire l'utilisateur de la liste des likes
       }
-    )
+    ).then(() => {
+      // Récupère le tweet pour mettre à jour le compteur de likes
+      return Tweet.findById(id);
+    })
+    .then(tweet => {
+      if (tweet) {
+        tweet.likes = tweet.usersLikes.length; // Met à jour le nombre de likes
+        return tweet.save();
+      }
+    })
     .then(res.json({ result: false}))
   }
 })
